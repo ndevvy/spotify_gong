@@ -27,7 +27,7 @@ class GongApp < Sinatra::Base
     end
     @gong.token = resp['access_token']
     @gong.refresh_token = resp['refresh_token']
-    "OK!"
+    @gong.token
   end
 
   post '/gong_current' do

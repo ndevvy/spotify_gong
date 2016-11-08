@@ -21,24 +21,28 @@ class SpotifyGong
   def gong_current_track
     playlists = _get_all_playlists
     current_track = _get_current_track.strip
+    current_track_name = _get_current_track_name
     playlists_removed = []
-    playlists.each { |p|
+    playlists["items"].each { |p|
       if _remove_track_from_playlist(current_track, p["id"])
         playlists_removed << p
       end
     }
-    "#{current_track} removed from #{playlists_removed.count} playlists"
+    "#{current_track_name} removed from #{playlists_removed.count} playlists"
   end
 
   def _remove_track_from_playlist(track_id, playlist_id)
-    query = {
-      "uri" => track_id
+    body = {
+      "tracks" => [{"uri" => track_id}]
     }
-    HTTParty.delete(
-      "https://api.spotify.com/v1/users/#{username}/playlists/#{playlist_id}/tracks",
-      :query => query,
+    resp = HTTParty.delete(
+      "https://api.spotify.com/v1/users/#{@username}/playlists/#{playlist_id}/tracks",
+      :body => body.to_json,
       :headers => {"Authorization" => "Bearer #{@token}"}
     )
+    if resp["snapshot_id"]
+      return true
+    end
   end
 
   def _get_all_playlists
@@ -50,6 +54,10 @@ class SpotifyGong
 
   def _get_current_track
     `osascript -e 'tell application "Spotify" to id of current track as string'`
+  end
+
+  def _get_current_track_name
+    `osascript -e 'tell application "Spotify" to name of current track as string'`
   end
 
   def _get_auth
