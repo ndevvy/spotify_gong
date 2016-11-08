@@ -21,7 +21,8 @@ class SpotifyGong
   def gong_current_track
     playlists = _get_all_playlists
     current_track = _get_current_track.strip
-    current_track_name = _get_current_track_name
+    current_track_name = _get_current_track_name.strip
+    `osascript -e 'tell application "Spotify" to next track'`
     playlists_removed = []
     playlists["items"].each { |p|
       if _remove_track_from_playlist(current_track, p["id"])
